@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>OrbitPay | Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =============================
+     HEADER
+============================= -->
+
+<header>
+
+    <a
+        href="admin-dashboard.html"
+        class="logo"
+    >
+        OrbitPay Admin
+    </a>
+
+
+    <div
+        style="
+            margin-left:auto;
+            display:flex;
+            gap:10px;
+            align-items:center;
+        "
+    >
+
+        <a
+            href="admin-messages.html"
+            class="btn primary-btn"
+        >
+            Messages
+        </a>
+
+
+        <button
+            type="button"
+            onclick="logout()"
+            class="btn primary-btn"
+        >
+            Logout
+        </button>
+
+    </div>
+
+</header>
+
+
+
+<!-- =============================
+     DASHBOARD
+============================= -->
+
+<section class="features">
+
+
+    <h1 class="section-title">
+        Admin Dashboard
+    </h1>
+
+
+    <p
+        style="
+            text-align:center;
+            margin-top:-10px;
+            margin-bottom:30px;
+        "
+    >
+        Welcome to your OrbitPay administration panel.
+    </p>
+
+
+    <!-- =============================
+         LOADING
+    ============================= -->
+
+    <p
+        id="loading"
+        style="text-align:center;"
+    >
+        Loading dashboard...
+    </p>
+
+
+
+    <!-- =============================
+         DASHBOARD STATISTICS
+    ============================= -->
+
+    <div
+        id="dashboard-stats"
+        style="
+            display:none;
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(220px, 1fr)
+                );
+            gap:20px;
+            margin-top:30px;
+        "
+    >
+
+
+        <!-- =============================
+             TOTAL MESSAGES
+        ============================= -->
+
+        <div
+            class="card"
+            style="text-align:center;"
+        >
+
+            <h3>
+                Total Messages
+            </h3>
+
+
+            <p
+                id="total-messages"
+                style="
+                    font-size:42px;
+                    font-weight:bold;
+                    margin:15px 0;
+                "
+            >
+                0
+            </p>
+
+
+            <p>
+                All contact messages
+            </p>
+
+        </div>
+
+
+
+        <!-- =============================
+             UNREAD MESSAGES
+        ============================= -->
+
+        <div
+            class="card"
+            style="text-align:center;"
+        >
+
+            <h3>
+                Unread Messages
+            </h3>
+
+
+            <p
+                id="unread-messages"
+                style="
+                    font-size:42px;
+                    font-weight:bold;
+                    margin:15px 0;
+                "
+            >
+                0
+            </p>
+
+
+            <p>
+                Messages waiting for attention
+            </p>
+
+        </div>
+
+
+
+        <!-- =============================
+             READ MESSAGES
+        ============================= -->
+
+        <div
+            class="card"
+            style="text-align:center;"
+        >
+
+            <h3>
+                Read Messages
+            </h3>
+
+
+            <p
+                id="read-messages"
+                style="
+                    font-size:42px;
+                    font-weight:bold;
+                    margin:15px 0;
+                "
+            >
+                0
+            </p>
+
+
+            <p>
+                Messages already reviewed
+            </p>
+
+        </div>
+
+
+
+        <!-- =============================
+             TODAY'S MESSAGES
+        ============================= -->
+
+        <div
+            class="card"
+            style="text-align:center;"
+        >
+
+            <h3>
+                Messages Today
+            </h3>
+
+
+            <p
+                id="messages-today"
+                style="
+                    font-size:42px;
+                    font-weight:bold;
+                    margin:15px 0;
+                "
+            >
+                0
+            </p>
+
+
+            <p>
+                Messages received today
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =============================
+         MESSAGE MANAGEMENT
+    ============================= -->
+
+    <div
+        class="card"
+        style="
+            margin-top:35px;
+            text-align:center;
+        "
+    >
+
+        <h2>
+            Contact Messages
+        </h2>
+
+
+        <p>
+            View, search, filter and manage messages
+            submitted through the OrbitPay website.
+        </p>
+
+
+        <br>
+
+
+        <a
+            href="admin-messages.html"
+            class="btn primary-btn"
+        >
+            View All Messages
+        </a>
+
+    </div>
+
+
+
+    <!-- =============================
+         DASHBOARD STATUS
+    ============================= -->
+
+    <div
+        class="card"
+        style="
+            margin-top:25px;
+            text-align:center;
+        "
+    >
+
+        <h3>
+            Dashboard Status
+        </h3>
+
+
+        <p id="last-updated">
+            Waiting for dashboard data...
+        </p>
+
+    </div>
+
+
+</section>
+
+
+
+<!-- =============================
+     JAVASCRIPT
+============================= -->
+
+<script>
+
+
+// =============================
+// GET ADMIN TOKEN
+// =============================
+
+const token =
+    localStorage.getItem(
+        "orbitpay_admin_token"
+    );
+
+
+
+// =============================
+// CHECK LOGIN
+// =============================
+
+if (!token) {
+
+    window.location.href =
+        "admin-login.html";
+
+}
+
+
+
+// =============================
+// LOAD DASHBOARD
+// =============================
+
+async function loadDashboard() {
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:3005/api/admin/dashboard",
+            {
+                method: "GET",
+
+                headers: {
+                    "Authorization":
+                        `Bearer ${token}`
+                }
+            }
+        );
+
+
+        const result =
+            await response.json();
+
+
+        console.log(
+            "DASHBOARD RESPONSE:",
+            result
+        );
+
+
+
+        // =============================
+        // TOKEN INVALID / EXPIRED
+        // =============================
+
+        if (response.status === 401) {
+
+            localStorage.removeItem(
+                "orbitpay_admin_token"
+            );
+
+            window.location.href =
+                "admin-login.html";
+
+            return;
+
+        }
+
+
+
+        // =============================
+        // OTHER SERVER ERROR
+        // =============================
+
+        if (!response.ok) {
+
+            document.getElementById(
+                "loading"
+            ).textContent =
+                result.message ||
+                "Unable to load dashboard.";
+
+            return;
+
+        }
+
+
+
+        // =============================
+        // CHECK DATA
+        // =============================
+
+        if (
+            !result.data
+        ) {
+
+            document.getElementById(
+                "loading"
+            ).textContent =
+                "Dashboard data was not received.";
+
+            return;
+
+        }
+
+
+
+        // =============================
+        // DISPLAY TOTAL MESSAGES
+        // =============================
+
+        document.getElementById(
+            "total-messages"
+        ).textContent =
+            result.data.totalMessages;
+
+
+
+        // =============================
+        // DISPLAY UNREAD
+        // =============================
+
+        document.getElementById(
+            "unread-messages"
+        ).textContent =
+            result.data.unreadMessages;
+
+
+
+        // =============================
+        // DISPLAY READ
+        // =============================
+
+        document.getElementById(
+            "read-messages"
+        ).textContent =
+            result.data.readMessages;
+
+
+
+        // =============================
+        // DISPLAY TODAY
+        // =============================
+
+        document.getElementById(
+            "messages-today"
+        ).textContent =
+            result.data.messagesToday;
+
+
+
+        // =============================
+        // HIDE LOADING
+        // =============================
+
+        document.getElementById(
+            "loading"
+        ).style.display =
+            "none";
+
+
+
+        // =============================
+        // SHOW STATISTICS
+        // =============================
+
+        document.getElementById(
+            "dashboard-stats"
+        ).style.display =
+            "grid";
+
+
+
+        // =============================
+        // LAST UPDATED
+        // =============================
+
+        document.getElementById(
+            "last-updated"
+        ).textContent =
+            "Dashboard updated: " +
+            new Date().toLocaleString();
+
+    }
+
+
+    catch (error) {
+
+        console.error(
+            "DASHBOARD ERROR:",
+            error
+        );
+
+
+        document.getElementById(
+            "loading"
+        ).textContent =
+            "Unable to connect to the server.";
+
+    }
+
+}
+
+
+
+// =============================
+// LOGOUT
+// =============================
+
+function logout() {
+
+    localStorage.removeItem(
+        "orbitpay_admin_token"
+    );
+
+
+    window.location.href =
+        "admin-login.html";
+
+}
+
+
+
+// =============================
+// INITIAL LOAD
+// =============================
+
+loadDashboard();
+
+
+
+// =============================
+// AUTO REFRESH
+// =============================
+
+setInterval(
+    loadDashboard,
+    10000
+);
+
+
+</script>
+
+
+</body>
+
+</html>

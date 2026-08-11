@@ -97,77 +97,88 @@
 
     <div class="card" style="max-width:800px;margin:auto;">
 
-        <form>
+<form id="contact-form">
 
-            <label>Full Name</label>
+    <label>Full Name</label>
 
-            <br><br>
+    <br><br>
 
-            <input
-                type="text"
-                placeholder="Enter your full name"
-                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+    <input
+        type="text"
+        name="name"
+        placeholder="Enter your full name"
+        required
+        style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
 
-            <br><br>
+    <br><br>
 
-            <label>Email Address</label>
+    <label>Email Address</label>
 
-            <br><br>
+    <br><br>
 
-            <input
-                type="email"
-                placeholder="Enter your email"
-                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+    <input
+        type="email"
+        name="email"
+        placeholder="Enter your email"
+        required
+        style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
 
-            <br><br>
+    <br><br>
 
-            <label>Subject</label>
+    <label>Subject</label>
 
-            <br><br>
+    <br><br>
 
-            <input
-                type="text"
-                placeholder="Subject"
-                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+    <input
+        type="text"
+        name="subject"
+        placeholder="Subject"
+        required
+        style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
 
-            <br><br>
+    <br><br>
 
-            <label>Department</label>
+    <label>Department</label>
 
-            <br><br>
+    <br><br>
 
-            <select style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+    <select
+        name="department"
+        required
+        style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
 
-                <option>Customer Support</option>
-                <option>Technical Support</option>
-                <option>Account Verification</option>
-                <option>Payments</option>
-                <option>Business Partnership</option>
-                <option>Marketing</option>
-                <option>General Enquiry</option>
+        <option value="Customer Support">Customer Support</option>
+        <option value="Technical Support">Technical Support</option>
+        <option value="Account Verification">Account Verification</option>
+        <option value="Payments">Payments</option>
+        <option value="Business Partnership">Business Partnership</option>
+        <option value="Marketing">Marketing</option>
+        <option value="General Enquiry">General Enquiry</option>
 
-            </select>
+    </select>
 
-            <br><br>
+    <br><br>
 
-            <label>Message</label>
+    <label>Message</label>
 
-            <br><br>
+    <br><br>
 
-            <textarea
-                rows="7"
-                placeholder="Write your message..."
-                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;"></textarea>
+    <textarea
+        name="message"
+        rows="7"
+        placeholder="Write your message..."
+        required
+        style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;"></textarea>
 
-            <br><br>
+    <br><br>
 
-            <button class="btn primary-btn">
+    <button type="submit" class="btn primary-btn">
 
-                Send Message
+        Send Message
 
-            </button>
+    </button>
 
-        </form>
+</form>
 
     </div>
 
@@ -424,6 +435,151 @@
 </footer>
 
 <script src="script.js"></script>
+
+<script>
+
+// =============================
+// CONTACT FORM
+// =============================
+
+const contactForm =
+    document.getElementById("contact-form");
+
+
+contactForm.addEventListener("submit", async function(event) {
+
+    // Stop the browser from refreshing the page
+    event.preventDefault();
+
+
+    // Get the submit button
+    const submitButton =
+        contactForm.querySelector("button[type='submit']");
+
+
+    // Change button text
+    submitButton.textContent =
+        "Sending...";
+
+
+    // Prevent multiple submissions
+    submitButton.disabled = true;
+
+
+    // Get form values
+    const formData = {
+
+        name:
+            contactForm.elements["name"].value.trim(),
+
+        email:
+            contactForm.elements["email"].value.trim(),
+
+        subject:
+            contactForm.elements["subject"].value.trim(),
+
+        department:
+            contactForm.elements["department"].value,
+
+        message:
+            contactForm.elements["message"].value.trim()
+
+    };
+
+
+    console.log("CONTACT FORM DATA:", formData);
+
+
+    try {
+
+        // Send data to OrbitPay backend
+        const response = await fetch(
+            "http://localhost:3005/api/contact",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(formData)
+
+            }
+        );
+
+
+        // Convert backend response to JSON
+        const result =
+            await response.json();
+
+
+        console.log(
+            "CONTACT API RESPONSE:",
+            result
+        );
+
+
+        // =============================
+        // SUCCESS
+        // =============================
+
+        if (response.ok) {
+
+            alert(
+                result.message ||
+                "Your message has been received!"
+            );
+
+
+            // Clear the form
+            contactForm.reset();
+
+
+        } else {
+
+            // =============================
+            // SERVER ERROR
+            // =============================
+
+            alert(
+                result.message ||
+                "Unable to send your message."
+            );
+
+        }
+
+
+    } catch (error) {
+
+        // =============================
+        // CONNECTION ERROR
+        // =============================
+
+        console.error(
+            "CONTACT FORM ERROR:",
+            error
+        );
+
+
+        alert(
+            "Unable to connect to the OrbitPay server. Please try again."
+        );
+
+
+    } finally {
+
+        // Restore button
+        submitButton.textContent =
+            "Send Message";
+
+
+        submitButton.disabled = false;
+
+    }
+
+});
+
+</script>
 
 </body>
 </html>

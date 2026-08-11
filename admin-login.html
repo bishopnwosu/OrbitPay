@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OrbitPay | Admin Login</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header>
+
+    <a href="index.html" class="logo">
+        OrbitPay
+    </a>
+
+</header>
+
+
+<section class="features">
+
+    <div class="card" style="max-width:500px;margin:50px auto;">
+
+        <h1 class="section-title">
+            Admin Login
+        </h1>
+
+        <form id="admin-login-form">
+
+            <label>Email Address</label>
+
+            <br><br>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="Enter admin email"
+                required
+                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+
+            <br><br>
+
+            <label>Password</label>
+
+            <br><br>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter password"
+                required
+                style="width:100%;padding:15px;border:1px solid #ccc;border-radius:8px;">
+
+            <br><br>
+
+            <button
+                type="submit"
+                class="btn primary-btn">
+
+                Login
+
+            </button>
+
+        </form>
+
+        <p id="login-message" style="margin-top:20px;"></p>
+
+    </div>
+
+</section>
+<script>
+
+const loginForm = document.getElementById("admin-login-form");
+
+loginForm.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+
+    const password = document.getElementById("password").value;
+
+    const message = document.getElementById("login-message");
+
+    message.textContent = "Logging in...";
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:3005/api/admin/login",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            }
+        );
+
+        const result = await response.json();
+
+        console.log("LOGIN RESPONSE:", result);
+
+       if (response.ok && result.status === "success") {
+
+    // Save the JWT token
+    localStorage.setItem("orbitpay_admin_token", result.token);
+
+    message.textContent = "Login successful!";
+
+    // Go to admin messages
+    window.location.href = "admin-messages.html";
+
+}else {
+
+            message.textContent =
+                result.message || "Login failed.";
+
+        }
+
+    } catch (error) {
+
+        console.error("LOGIN ERROR:", error);
+
+        message.textContent =
+            "Unable to connect to the server.";
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
